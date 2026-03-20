@@ -1268,12 +1268,19 @@ class LooterEncounterApp extends FormApplication {
       this.render(false);
     });
 
-    html.find(".looter-item-row").attr("draggable", true).on("dragstart", ev => {
-      const idx = Number(ev.currentTarget.dataset.index);
-      if (!Number.isFinite(idx)) return;
-      ev.originalEvent.dataTransfer?.setData("text/plain", String(idx));
-      ev.originalEvent.dataTransfer.effectAllowed = "move";
-    });
+    html.find(".looter-item-row").attr("draggable", true)
+      .on("dragstart", ev => {
+        const idx = Number(ev.currentTarget.dataset.index);
+        if (!Number.isFinite(idx)) return;
+        ev.originalEvent.dataTransfer?.setData("text/plain", String(idx));
+        ev.originalEvent.dataTransfer.effectAllowed = "move";
+      })
+      .on("click", ev => {
+        ev.preventDefault();
+        const idx = Number(ev.currentTarget.dataset.index);
+        if (!Number.isFinite(idx)) return;
+        this._openItem(idx);
+      });
 
     html.find(".looter-player-card").on("dragover", ev => {
       ev.preventDefault();
@@ -1355,6 +1362,41 @@ class LooterEncounterApp extends FormApplication {
       currency: clone(this.state.currency),
       items: clone(this.state.items)
     };
+  }
+
+  async _openItem(idx) {
+    if (!Number.isFinite(idx) || !this.state.items[idx]) return;
+    const item = this.state.items[idx];
+
+    try {
+      if (item.sourceUuid) {
+        const doc = await fromUuid(item.sourceUuid);
+        if (doc) {
+          if (doc.sheet && typeof doc.sheet.render === "function") {
+            doc.sheet.render(true);
+            return;
+          }
+          if (doc instanceof Item && typeof doc.sheet?.render === "function") {
+            doc.sheet.render(true);
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`${LOOTER_ID} | Failed to open source document for item`, err, item);
+    }
+
+    const data = item.itemData || {};
+    const description = (data?.system?.description?.value) || (data?.data?.description?.value) || data?.description || "";
+    const safeImg = foundry.utils.escapeHTML(item.img || "");
+    const content = `<div class="looter-item-preview"><div style="display:flex;gap:12px;align-items:flex-start;"><img src="${safeImg}" alt="" style="width:96px;height:auto;border-radius:4px;"/><div>${description || "<p>No description available.</p>"}</div></div></div>`;
+
+    new Dialog({
+      title: item.name || "Item",
+      content,
+      buttons: { close: { label: "Close" } },
+      default: "close"
+    }).render(true);
   }
 
 
