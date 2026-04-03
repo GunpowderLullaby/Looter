@@ -61,7 +61,7 @@ It replaces manual loot tracking with a fast, visual workflow that lets GMs roll
   - **Loot**
 - Drag-and-drop items to assign loot
 - Remove items from players back to the loot pool
-- Supports compendium-backed items with full data and icons
+- Supports compendium-backed **items** with full data and icons. Note: roll tables need to be populated with actual items.  Text entries will not work, and will give you wonky results.
 
 ---
 
@@ -138,9 +138,9 @@ Looter will:
 ## Roadmap
 
 Planned improvements:
+- Player side item claiming.
+- After-the-fact item dropping into the rolled items field.
 - Item stacking (e.g., Potion ×3)
-- Currency auto-split
-- Drag currency to players
 - Loot history / persistence
 - UI polish and animations
 
